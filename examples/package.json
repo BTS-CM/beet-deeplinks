@@ -1,0 +1,15 @@
+{
+    "name": "examples",
+    "version": "0.1.0",
+    "type": "module",
+    "apiversion": 3,
+    "description": "beet deeplink examples",
+    "scripts": {},
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "bitsharesjs": "6.0.0",
+        "bitsharesjs-ws": "^6.0.0",
+        "crypto-js": "^4.1.1"
+    }
+}
