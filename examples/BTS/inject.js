@@ -82,6 +82,8 @@ import DeepLink from "../../src/lib/DeepLink.js";
       return reject("Couldn't encrypt payload");
     }
   
-    return resolve(`beet://api?chain=${chain}&request=${encryptedPayload}`);
+    return resolve(
+      `beet://api?chain=${chain}&request=${encodeURIComponent(encryptedPayload)}`
+    );
   });
 }

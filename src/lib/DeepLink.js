@@ -23,7 +23,7 @@ class DeepLink {
             let encryptedPayload;
             try {
                 encryptedPayload = aes.encrypt(
-                    encodeURIComponent(JSON.stringify(payload)),
+                    JSON.stringify(payload),
                     this.beetKey
                 ).toString();
             } catch (error) {
