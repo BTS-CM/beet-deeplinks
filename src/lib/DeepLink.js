@@ -1,8 +1,12 @@
 import aes from "crypto-js/aes.js";
+import Base64 from 'crypto-js/enc-base64.js';
+import Utf8 from 'crypto-js/enc-utf8.js'
+import { v4 as uuidv4 } from 'uuid';
 
 class DeepLink {
-    constructor(appName, browser, origin, beetKey) {
+    constructor(appName, chain, browser, origin, beetKey) {
         this.appName = appName; // Name/identifier of the app making use of this client
+        this.chain = chain;
         this.browser = browser;
         this.origin = origin;
         this.beetKey = beetKey;
@@ -11,19 +15,28 @@ class DeepLink {
     /**
      * Encrypt the deeplink payload
      *
+     * @param {string} type Name of the call to execute
      * @param {object} payload
      * @returns {String}
      */
-    async encryptPayload(payload) {
+    async encryptPayload(type, payload) {
         return new Promise(async (resolve, reject) => {
             if (!this.beetKey) {
                 return reject('No beet key');
             }
 
+            let request = {type: type};
+            request.id = await uuidv4();
+            request.payload = payload;
+            request.payload.appName = this.appName;
+            request.payload.chain = this.chain;
+            request.payload.browser = this.browser;
+            request.payload.origin = this.origin;
+
             let encryptedPayload;
             try {
                 encryptedPayload = aes.encrypt(
-                    JSON.stringify(payload),
+                    JSON.stringify(request),
                     this.beetKey
                 ).toString();
             } catch (error) {
@@ -31,7 +44,23 @@ class DeepLink {
                 return reject(error)
             }
 
-            return resolve(encryptedPayload)
+            let stringified;
+            try {
+                stringified = Base64.stringify(Utf8.parse(encryptedPayload));
+            } catch (error) {
+                console.log(error)
+                return reject(error)
+            }
+
+            let encoded;
+            try {
+                encoded = encodeURIComponent(stringified);
+            } catch (error) {
+                console.log(error)
+                return reject(error)
+            }
+
+            return resolve(encoded)
         });
     }
 
@@ -52,33 +81,24 @@ class DeepLink {
                 if (typeof private_key !== "string" || !private_key || private_key !== "inject_wif") {
                     throw new Error("Do not inject wif while using Beet")
                 }
-                if (!this.signer_public_keys) {
+                if (!this.signer_public_keys || !public_key) {
                     this.signer_public_keys = [];
                 }
-                this.signer_public_keys.push(public_key);
-            };
-            TransactionBuilder.prototype.sign = function sign(chain_id = null) {
-                // do nothing, wait for broadcast
-                if (!this.tr_buffer) {
-                    throw new Error("not finalized");
-                }
-                if (this.signed) {
-                    throw new Error("already signed");
-                }
-                if (!this.signer_public_keys.length) {
-                    throw new Error(
-                        "Transaction was not signed. Do you have a private key? [no_signers]"
-                    );
-                }
-                this.signed = true;
             };
             let handle_payload = function handlePayload(builder) {
                 return new Promise((resolve, reject) => {
                     if (builder.operations.length != builder.operations.length) {
                         throw "Serialized and constructed operation count differs"
                     }
-                    let args = ["signAndBroadcast", JSON.stringify(builder.toObject()), builder.signer_public_keys];
-                    encryptPayload(args).then((result) => {
+                    let args = [
+                        "signAndBroadcast",
+                        JSON.stringify(builder.toObject()),
+                        builder && builder.signer_public_keys ? builder.signer_public_key : []
+                    ];
+                    encryptPayload('api', {
+                        method: 'injectedCall',
+                        params: args
+                    }).then((result) => {
                         resolve(result);
                     }).catch((err) => {
                         reject(err);
@@ -105,31 +125,9 @@ class DeepLink {
                 if (typeof private_key !== "string" || !private_key || private_key !== "inject_wif") {
                     throw new Error("Do not inject wif while using Beet")
                 }
-                if (!this.signer_public_keys) {
+                if (!this.signer_public_keys || !public_key) {
                     this.signer_public_keys = [];
                 }
-                this.signer_public_keys.push(public_key);
-            };
-            TransactionBuilder.prototype.sign = function sign(chain_id = null) {
-                return new Promise((resolve, reject) => {
-                    let args = ["sign", JSON.stringify(this.toObject()), this.signer_public_keys];
-                    encryptPayload(args).then((result) => {
-                        // check that it's the same
-                        console.log(result);
-                        let tr = new TransactionBuilder(JSON.parse(result));
-                        let sigs = tr.signatures;
-                        tr.signatures = [];
-                        if (JSON.stringify(tr) === JSON.stringify(this)) {
-                            throw "Oh boy!"
-                        }
-                        this.signatures = sigs;
-                        this.signer_private_keys = [];
-                        this.signed = true;
-                        resolve();
-                    }).catch((err) => {
-                        reject(err);
-                    });
-                });
             };
         } else if (!options.sign && options.broadcast) {
             throw "Unsupported injection"
@@ -146,6 +144,69 @@ class DeepLink {
             return this.injectTransactionBuilder(pointOfInjection, options);
         }
         throw new Error("Unsupported point of injection")
+    }
+
+    /**
+     * Requests to execute a library call for the linked chain
+     *
+     * @param payload
+     * @returns {Promise} Resolving is done by Beet
+     */
+    async injectedCall(payload) {
+        let injectedCall;
+        try {
+            injectedCall = await this.encryptPayload('api', {
+                method: 'injectedCall',
+                params: payload
+            });
+        } catch (error) {
+            console.log(error)
+            return;
+        }
+
+        return injectedCall;
+    }
+
+    /**
+     * Requests a vote for specified votable object
+     *
+     * @param payload
+     * @returns {Promise} Resolving is done by Beet
+     */
+    async voteFor(payload) {
+        let vote;
+        try {
+            vote = await this.encryptPayload('api', {
+                method: 'voteFor',
+                params: payload
+            });
+        } catch (error) {
+            console.log(error);
+            return;
+        }
+
+        return vote;
+    }
+
+    /**
+     * Requests to execute a transfer for the linked chain
+     *
+     * @param payload
+     * @returns {Promise} Resolving is done by Beet
+     */
+    async transfer(payload) {
+        let beetTransfer;
+        try {
+            beetTransfer = await this.encryptPayload('api', {
+                method: 'transfer',
+                params: payload
+            });
+        } catch (error) {
+            console.log(error)
+            return;
+        }
+
+        return beetTransfer;
     }
 }
 

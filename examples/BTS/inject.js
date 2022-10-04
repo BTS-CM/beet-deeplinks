@@ -19,7 +19,7 @@ import DeepLink from "../../src/lib/DeepLink.js";
   beetKey
 ) {
   return new Promise(async (resolve, reject) => {
-    let beetLink = new DeepLink(scriptName, 'cli', 'localhost', beetKey);
+    let beetLink = new DeepLink(scriptName, chain, 'cli', 'localhost', beetKey);
 
     let TXBuilder = beetLink.inject(TransactionBuilder);
   
@@ -77,13 +77,8 @@ import DeepLink from "../../src/lib/DeepLink.js";
       return reject(error);
     }
   
-    if (!encryptedPayload || !encryptedPayload) {
-      console.log("Couldn't encrypt payload");
-      return reject("Couldn't encrypt payload");
-    }
-  
     return resolve(
-      `beet://api?chain=${chain}&request=${encodeURIComponent(encryptedPayload)}`
+      `beet://api?chain=${chain}&request=${encryptedPayload}`
     );
   });
 }
