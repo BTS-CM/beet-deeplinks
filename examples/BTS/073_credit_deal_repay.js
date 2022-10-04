@@ -1,28 +1,24 @@
 import inject from './inject.js'
 
-let run = async function () {
-  var expiry = new Date();
-  expiry.setMinutes(expiry.getMinutes() + 60);
-
-  let injectionResult;
+let run = async function () { 
+    let injectionResult;
   try {
     injectionResult = await inject(
-      "InjectExample.001", // script name
-      "BTS_TEST",
+      "InjectExample.073", // script name
+      "BTS_TEST", // chain
       "wss://testnet.xbts.io/ws", // wss url
-      "limit_order_create", // operation name
+      "credit_deal_repay", // operation name
       {
-        seller: "1.2.26299",
-        amount_to_sell: {
+        account: "1.2.x",
+        deal_id: "1.22.x",
+        repay_amount: {
           amount: 1,
-          asset_id: "1.3.0"
+          asset_id: "1.3.x"
         },
-        min_to_receive: {
+        credit_fee: {
           amount: 1,
-          asset_id: "1.3.1756"
+          asset_id: "1.3.x"
         },
-        expiration: expiry,
-        fill_or_kill: false,
         extensions: []
       },
       "" // beetKey

@@ -1,28 +1,23 @@
 import inject from './inject.js'
 
-let run = async function () {
-  var expiry = new Date();
-  expiry.setMinutes(expiry.getMinutes() + 60);
-
-  let injectionResult;
-  try {
-    injectionResult = await inject(
-      "InjectExample.001", // script name
-      "BTS_TEST",
+let run = async function () { 
+    let injectionResult;
+    try {
+      injectionResult = await inject(
+      "InjectExample.045", // script name
+      "BTS_TEST", // chain
       "wss://testnet.xbts.io/ws", // wss url
-      "limit_order_create", // operation name
+      "bid_collateral", // operation name
       {
-        seller: "1.2.26299",
-        amount_to_sell: {
+        bidder: "1.2.x",
+        additional_collateral: {
           amount: 1,
-          asset_id: "1.3.0"
+          asset_id: "1.3.x"
         },
-        min_to_receive: {
+        debt_covered: {
           amount: 1,
-          asset_id: "1.3.1756"
+          asset_id: "1.3.x"
         },
-        expiration: expiry,
-        fill_or_kill: false,
         extensions: []
       },
       "" // beetKey
