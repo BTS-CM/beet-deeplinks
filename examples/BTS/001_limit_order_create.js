@@ -1,10 +1,8 @@
 import inject from './inject.js'
 
 let run = async function () {
-
-  let currentDate = new Date();
-  let currentMonth = currentDate.getMonth(); // for example, 2021
-  currentDate.setMonth(currentMonth + 1);
+  var expiry = new Date();
+  expiry.setMinutes(expiry.getMinutes() + 60);
 
   let injectionResult;
   try {
@@ -23,11 +21,11 @@ let run = async function () {
           amount: 1,
           asset_id: "1.3.1756"
         },
-        expiration: currentDate,
-        fill_or_kill: true,
+        expiration: expiry,
+        fill_or_kill: false,
         extensions: []
       },
-      "" // beetKey
+      "1d486d21dbc8cc4" // beetKey
     );
   } catch (error) {
     console.log(error)

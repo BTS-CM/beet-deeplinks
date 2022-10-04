@@ -40,30 +40,49 @@ import DeepLink from "../../src/lib/DeepLink.js";
     tr.add_type_operation(opType, opContents);
     
     try {
-      await tr.set_required_fees();
-    } catch (error) {
-      console.error(error);
-      return reject(error);
-    }
-    
-    try {
       await tr.update_head_block();
     } catch (error) {
       console.error(error);
       return reject(error);
     }
-    
-    if (opContents.expiry) {
-        try {
-            await tr.set_expire_seconds(2630000); // 1 month exipiry
-        } catch (error) {
-            console.error(error);
-            return reject(error);
-        }
+
+    try {
+      await tr.set_required_fees();
+    } catch (error) {
+      console.error(error);
+      return reject(error);
     }
-    
+
+    if (opContents.expiry || opContents.expiration) {
+      let targetDate = opContents.expiry || opContents.expiration;
+      let expirySeconds = Math.round(
+        Math.abs(
+          (targetDate.getTime() - new Date().getTime()) / 1000
+        )
+      );
+
+      if (!expirySeconds || expirySeconds <= 0) { // TODO: limit to max chain expiry
+        console.log("Invalid expiry")
+        return reject("Invalid expiry")
+      }
+
+      try {
+          tr.set_expire_seconds(expirySeconds); // 1 month exipiry
+      } catch (error) {
+          console.error(error);
+          return reject(error);
+      }
+   }
+
     try {
       tr.add_signer("inject_wif");
+    } catch (error) {
+      console.error(error);
+      return reject(error);
+    }
+
+    try {
+      tr.finalize();
     } catch (error) {
       console.error(error);
       return reject(error);

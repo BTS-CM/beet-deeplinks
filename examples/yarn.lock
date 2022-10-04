@@ -27,10 +27,9 @@ bitsharesjs-ws@^6.0.0:
     isomorphic-ws "^4.0.1"
     ws "^8.4.0"
 
-bitsharesjs@6.0.0:
+"bitsharesjs@https://github.com/bitshares/bitsharesjs#develop":
   version "6.0.0"
-  resolved "https://registry.yarnpkg.com/bitsharesjs/-/bitsharesjs-6.0.0.tgz#1de869e6e9c9f5ba17b7a3c4baf67e9f78b9bb82"
-  integrity sha512-KSYvLvbRLNZ+cdzAiQ6YuryZx1b7yXnz7pOBzbRt5yz+7KIh7OUFUJBQ45G6wwBIc3kqnxcZVOsISwl7hLoGFQ==
+  resolved "https://github.com/bitshares/bitsharesjs#09fee4d6c40039db4e3b7cdc04bd4681a8112f2c"
   dependencies:
     bigi "^1.4.2"
     bitsharesjs-ws "^6.0.0"
