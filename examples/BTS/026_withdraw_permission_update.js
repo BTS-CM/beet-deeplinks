@@ -19,8 +19,7 @@ let run = async function () {
         withdrawal_period_sec: uint32,
         period_start_time: time_point_sec,
         periods_until_expiration: uint32
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -34,6 +33,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

@@ -38,8 +38,7 @@ let run = async function () {
         bitasset_opts: null,
         is_prediction_market: false,
         extensions: []
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -53,6 +52,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

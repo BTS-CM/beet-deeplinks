@@ -24,8 +24,7 @@ let run = async function () {
             address_auths: [{"": 1}]
           }
         }],
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -39,6 +38,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

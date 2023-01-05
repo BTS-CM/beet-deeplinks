@@ -18,8 +18,7 @@ let run = async function () {
         key_approvals_to_add: [""],
         key_approvals_to_remove: [""],
         extensions: []
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -33,6 +32,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

@@ -12,8 +12,7 @@ let run = async function () {
         account_to_upgrade: "1.2.x",
         upgrade_to_lifetime_member: true,
         extensions: []
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -27,6 +26,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

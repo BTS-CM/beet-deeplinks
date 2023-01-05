@@ -13,8 +13,7 @@ let run = async function () {
         asset_id: "1.2.x",
         amount: 1,
         extensions: []
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -28,6 +27,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

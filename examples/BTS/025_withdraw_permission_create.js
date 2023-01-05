@@ -18,8 +18,7 @@ let run = async function () {
         withdrawal_period_sec: 60000,
         periods_until_expiration: 60000,
         period_start_time: 1663764871
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -33,6 +32,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

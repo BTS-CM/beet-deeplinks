@@ -12,8 +12,7 @@ let run = async function () {
         withdraw_from_account: "1.2.x",
         authorized_account: "1.2.x",
         withdrawal_permission: "1.12.x"
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -27,6 +26,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

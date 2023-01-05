@@ -12,8 +12,7 @@ let run = async function () {
         account: "1.2.x",
         authority_to_delete: "2.14.x",
         extensions: []
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -27,6 +26,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

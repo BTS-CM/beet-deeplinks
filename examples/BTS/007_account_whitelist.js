@@ -13,8 +13,7 @@ let run = async function () {
         account_to_list: "1.2.x",
         new_listing: 0,
         extensions: []
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -28,6 +27,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

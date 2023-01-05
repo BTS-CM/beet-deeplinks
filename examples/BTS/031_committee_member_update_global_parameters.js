@@ -51,8 +51,7 @@ let run = async function () {
           max_authority_depth: 0,
           extensions: []
         }
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -66,6 +65,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "crypto-js": "^4.1.1",
+    "prompts": "^2.4.2",
     "uuid": "^9.0.0"
   }
 }

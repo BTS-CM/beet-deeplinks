@@ -1,6 +1,11 @@
 import { TransactionBuilder } from 'bitsharesjs';
 import { Apis } from "bitsharesjs-ws";
 import DeepLink from "../../src/lib/DeepLink.js";
+import prompts from 'prompts';
+
+const onCancel = prompt => {
+  console.log('rejected prompt')
+}
 
 /**
  * Inject an operation into Beet for broadcast
@@ -15,13 +20,75 @@ import DeepLink from "../../src/lib/DeepLink.js";
   chain,
   wsURL,
   opType,
-  opContents,
-  beetKey
+  opContents
 ) {
   return new Promise(async (resolve, reject) => {
-    let beetLink = new DeepLink(scriptName, chain, 'cli', 'localhost', beetKey);
 
-    let TXBuilder = beetLink.inject(TransactionBuilder);
+    let response;
+    try {
+        response = await prompts(
+            [
+                {
+                    type: 'select',
+                    name: 'deeplinkType',
+                    message: 'What type of Beet deeplink are you creating?',
+                    choices: [
+                        {
+                            title: 'TOTP',
+                            value: true
+                        },
+                        {
+                            title: 'RAW',
+                            value: false
+                        },
+                    ]
+                },
+            ],
+            { onCancel }
+        );
+    } catch (error) {
+        console.log(error);
+    }
+    
+    if (!response) {
+        process.exit();
+        return;
+    }
+
+    let totpCode;
+    if (response.deeplinkType === true) {
+      let totpCodePrompt;
+      try {
+        totpCodePrompt = await prompts(
+              [
+                {
+                  type: 'text',
+                  name: 'value',
+                  message: `Enter your Beet TOTP code:`
+              },
+              ],
+              { onCancel }
+          );
+      } catch (error) {
+          console.log(error);
+      }
+
+      if (!totpCodePrompt || !totpCodePrompt.value) {
+        console.log("Invalid TOTP code");
+        process.exit();
+        return;
+      }
+
+      totpCode = totpCodePrompt.value;
+    }
+
+    let beetLink = new DeepLink(scriptName, chain, 'cli', 'localhost', totpCode ?? '');
+
+    let TXBuilder = await beetLink.inject(
+      TransactionBuilder,
+      {sign: true, broadcast: true},
+      response.deeplinkType
+    );
   
     try {
       await Apis.instance(
@@ -97,7 +164,7 @@ import DeepLink from "../../src/lib/DeepLink.js";
     }
   
     return resolve(
-      `beet://api?chain=${chain}&request=${encryptedPayload}`
+      `${response.deeplinkType === true ? 'beet' : 'rawbeet'}://api?chain=${chain}&request=${encryptedPayload}`
     );
   });
 }

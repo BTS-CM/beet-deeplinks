@@ -4,24 +4,25 @@ import Utf8 from 'crypto-js/enc-utf8.js'
 import { v4 as uuidv4 } from 'uuid';
 
 class DeepLink {
-    constructor(appName, chain, browser, origin, beetKey) {
+    constructor(appName, chain, browser, origin, totpCode) {
         this.appName = appName; // Name/identifier of the app making use of this client
         this.chain = chain;
         this.browser = browser;
         this.origin = origin;
-        this.beetKey = beetKey;
-      }
+        this.totpCode = totpCode;
+    }
 
     /**
-     * Encrypt the deeplink payload
+     * Encode the deeplink payload
      *
      * @param {string} type Name of the call to execute
      * @param {object} payload
+     * @param {boolean} encrypt
      * @returns {String}
      */
-    async encryptPayload(type, payload) {
+    async encodePayload(type, payload, encrypt) {
         return new Promise(async (resolve, reject) => {
-            if (!this.beetKey) {
+            if (encrypt && !this.totpCode) {
                 return reject('No beet key');
             }
 
@@ -34,19 +35,23 @@ class DeepLink {
             request.payload.origin = this.origin;
 
             let encryptedPayload;
-            try {
-                encryptedPayload = aes.encrypt(
-                    JSON.stringify(request),
-                    this.beetKey
-                ).toString();
-            } catch (error) {
-                console.log(error)
-                return reject(error)
+            if (encrypt) {
+                try {
+                    encryptedPayload = aes.encrypt(
+                        JSON.stringify(request),
+                        this.totpCode
+                    ).toString();
+                } catch (error) {
+                    console.log(error)
+                    return reject(error)
+                }
             }
 
             let stringified;
             try {
-                stringified = Base64.stringify(Utf8.parse(encryptedPayload));
+                stringified = Base64.stringify(
+                    Utf8.parse(encryptedPayload)
+                );
             } catch (error) {
                 console.log(error)
                 return reject(error)
@@ -54,13 +59,15 @@ class DeepLink {
 
             let encoded;
             try {
-                encoded = encodeURIComponent(stringified);
+                encoded = encodeURIComponent(
+                    encrypt ? stringified : JSON.stringify(request)
+                );
             } catch (error) {
                 console.log(error)
                 return reject(error)
             }
 
-            return resolve(encoded)
+            return resolve(encoded);
         });
     }
 
@@ -69,10 +76,11 @@ class DeepLink {
      *
      * @param {Module} TransactionBuilder
      * @param {object} options
+     * @param {Boolean} encrypted
      * @returns {Module}
      */
-    injectTransactionBuilder(TransactionBuilder, options) {
-        let encryptPayload = this.encryptPayload.bind(this);
+    injectTransactionBuilder(TransactionBuilder, options, encrypted) {
+        let encodePayload = this.encodePayload.bind(this);
 
         // if both options are set, we only want 1 beet call anyways
         if (options.sign && options.broadcast) {
@@ -95,10 +103,14 @@ class DeepLink {
                         JSON.stringify(builder.toObject()),
                         builder && builder.signer_public_keys ? builder.signer_public_key : []
                     ];
-                    encryptPayload('api', {
-                        method: 'injectedCall',
-                        params: args
-                    }).then((result) => {
+                    encodePayload(
+                        'api',
+                        {
+                            method: 'injectedCall',
+                            params: args
+                        },
+                        encrypted
+                    ).then((result) => {
                         resolve(result);
                     }).catch((err) => {
                         reject(err);
@@ -138,10 +150,16 @@ class DeepLink {
     /*
      * Inject an external blockchain library into Beet-JS
      */
-    inject(pointOfInjection, options = {sign: true, broadcast: true}) {
+    /**
+     * 
+     * @param {String} pointOfInjection 
+     * @param {Object} options
+     * @param {Boolean} encrypted 
+     * @returns 
+     */
+    async inject(pointOfInjection, options = {sign: true, broadcast: true}, encrypted) {
         if (!!pointOfInjection.prototype && !!pointOfInjection.prototype.get_type_operation) {
-            // transaction builder
-            return this.injectTransactionBuilder(pointOfInjection, options);
+            return this.injectTransactionBuilder(pointOfInjection, options, encrypted);
         }
         throw new Error("Unsupported point of injection")
     }
@@ -152,10 +170,11 @@ class DeepLink {
      * @param payload
      * @returns {Promise} Resolving is done by Beet
      */
+    /*
     async injectedCall(payload) {
         let injectedCall;
         try {
-            injectedCall = await this.encryptPayload('api', {
+            injectedCall = await this.encodePayload('api', {
                 method: 'injectedCall',
                 params: payload
             });
@@ -166,6 +185,7 @@ class DeepLink {
 
         return injectedCall;
     }
+    */
 
     /**
      * Requests a vote for specified votable object
@@ -173,10 +193,11 @@ class DeepLink {
      * @param payload
      * @returns {Promise} Resolving is done by Beet
      */
+    /*
     async voteFor(payload) {
         let vote;
         try {
-            vote = await this.encryptPayload('api', {
+            vote = await this.encodePayload('api', {
                 method: 'voteFor',
                 params: payload
             });
@@ -187,6 +208,7 @@ class DeepLink {
 
         return vote;
     }
+    */
 
     /**
      * Requests to execute a transfer for the linked chain
@@ -194,10 +216,11 @@ class DeepLink {
      * @param payload
      * @returns {Promise} Resolving is done by Beet
      */
+    /*
     async transfer(payload) {
         let beetTransfer;
         try {
-            beetTransfer = await this.encryptPayload('api', {
+            beetTransfer = await this.encodePayload('api', {
                 method: 'transfer',
                 params: payload
             });
@@ -208,6 +231,7 @@ class DeepLink {
 
         return beetTransfer;
     }
+    */
 }
 
 export default DeepLink;

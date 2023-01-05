@@ -14,8 +14,7 @@ let run = async function () {
         proposed_ops: [{}],
         review_period_seconds: 60000,
         extensions: []
-      },
-      "" // beetKey
+      }
     );
   } catch (error) {
     console.log(error)
@@ -29,6 +28,8 @@ let run = async function () {
     console.log('Invalid injection result')
     return;
   }
+
+  process.exit(0);
 }
 
 run();
