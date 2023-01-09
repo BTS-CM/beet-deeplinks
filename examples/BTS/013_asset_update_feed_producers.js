@@ -5,8 +5,6 @@ let run = async function () {
     try {
       injectionResult = await inject(
       "InjectExample.013",
-      "BTS",
-      "wss://node.xbts.io/ws",
       "asset_update_feed_producers",
       {
         issuer: "",

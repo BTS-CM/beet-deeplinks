@@ -5,8 +5,6 @@ let run = async function () {
     try {
       injectionResult = await inject(
       "InjectExample.028", // script name
-      "BTS_TEST", // chain
-      "wss://testnet.xbts.io/ws", // wss url
       "withdraw_permission_delete", // operation name
       {
         withdraw_from_account: "1.2.x",

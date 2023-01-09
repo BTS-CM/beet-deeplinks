@@ -5,8 +5,6 @@ let run = async function () {
   try {
     injectionResult = await inject(
       "InjectExample.069", // script name
-      "BTS_TEST", // chain
-      "wss://testnet.xbts.io/ws", // wss url
       "credit_offer_create", // operation name
       {
         owner_account: "1.2.x",

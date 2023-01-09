@@ -8,8 +8,6 @@ let run = async function () {
   try {
     injectionResult = await inject(
       "InjectExample.001", // script name
-      "BTS_TEST",
-      "wss://testnet.xbts.io/ws", // wss url
       "limit_order_create", // operation name
       {
         seller: "1.2.26299",

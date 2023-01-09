@@ -1,7 +1,9 @@
 import { TransactionBuilder } from 'bitsharesjs';
 import { Apis } from "bitsharesjs-ws";
-import DeepLink from "../../src/lib/DeepLink.js";
 import prompts from 'prompts';
+
+import DeepLink from "../../src/lib/DeepLink.js";
+import { testNodes } from "../../src/lib/queries.js";
 
 const onCancel = prompt => {
   console.log('rejected prompt')
@@ -10,15 +12,11 @@ const onCancel = prompt => {
 /**
  * Inject an operation into Beet for broadcast
  * @param {string} scriptName
- * @param {string} chain
- * @param {string} wsURL
  * @param {string} opType
  * @param {Object} opContents
  */
  export default async function inject (
   scriptName,
-  chain,
-  wsURL,
   opType,
   opContents
 ) {
@@ -28,21 +26,36 @@ const onCancel = prompt => {
     try {
         response = await prompts(
             [
-                {
-                    type: 'select',
-                    name: 'deeplinkType',
-                    message: 'What type of Beet deeplink are you creating?',
-                    choices: [
-                        {
-                            title: 'TOTP',
-                            value: true
-                        },
-                        {
-                            title: 'RAW',
-                            value: false
-                        },
-                    ]
-                },
+              {
+                type: 'select',
+                name: 'deeplinkType',
+                message: 'What type of Beet deeplink are you creating?',
+                choices: [
+                    {
+                        title: 'TOTP',
+                        value: true
+                    },
+                    {
+                        title: 'RAW',
+                        value: false
+                    },
+                ]
+              },
+              {
+                type: 'select',
+                name: 'environment',
+                message: 'Which blockchain do you want to use?',
+                choices: [
+                    {
+                        title: 'Bitshares',
+                        value: "BTS"
+                    },
+                    {
+                        title: 'Bitshares (Testnet)',
+                        value: "BTS_TEST"
+                    },
+                ]
+              },
             ],
             { onCancel }
         );
@@ -50,9 +63,9 @@ const onCancel = prompt => {
         console.log(error);
     }
     
-    if (!response) {
+    if (!response || !response.environment) {
+        console.log("Invalid args");
         process.exit();
-        return;
     }
 
     let totpCode;
@@ -76,13 +89,18 @@ const onCancel = prompt => {
       if (!totpCodePrompt || !totpCodePrompt.value) {
         console.log("Invalid TOTP code");
         process.exit();
-        return;
       }
 
       totpCode = totpCodePrompt.value;
     }
 
-    let beetLink = new DeepLink(scriptName, chain, 'cli', 'localhost', totpCode ?? '');
+    let beetLink = new DeepLink(
+      scriptName,
+      response.environment,
+      'cli',
+      'localhost',
+      totpCode ?? ''
+    );
 
     let TXBuilder = await beetLink.inject(
       TransactionBuilder,
@@ -90,9 +108,22 @@ const onCancel = prompt => {
       response.deeplinkType
     );
   
+    let tested;
+    try {
+      tested = await testNodes(response.environment);
+    } catch (error) {
+      console.log(error);
+      process.exit();
+    }
+
+    if (!tested || !tested.length) {
+      console.log("No nodes available");
+      process.exit();
+    }
+
     try {
       await Apis.instance(
-          wsURL,
+          tested[0],
           true,
           10000,
           {enableCrypto: false, enableOrders: true},
@@ -164,7 +195,7 @@ const onCancel = prompt => {
     }
   
     return resolve(
-      `${response.deeplinkType === true ? 'beet' : 'rawbeet'}://api?chain=${chain}&request=${encryptedPayload}`
+      `${response.deeplinkType === true ? 'beet' : 'rawbeet'}://api?chain=${response.environment}&request=${encryptedPayload}`
     );
   });
 }
