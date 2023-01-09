@@ -151,6 +151,7 @@ const onCancel = prompt => {
       return reject(error);
     }
 
+    let expirySeconds;
     if (opContents.expiry || opContents.expiration) {
       let targetDate = opContents.expiry || opContents.expiration;
       let expirySeconds = Math.round(
@@ -163,14 +164,14 @@ const onCancel = prompt => {
         console.log("Invalid expiry")
         return reject("Invalid expiry")
       }
+    }
 
-      try {
-          tr.set_expire_seconds(expirySeconds); // 1 month exipiry
-      } catch (error) {
-          console.error(error);
-          return reject(error);
-      }
-   }
+    try {
+        tr.set_expire_seconds(expirySeconds ?? 3600);
+    } catch (error) {
+        console.error(error);
+        return reject(error);
+    }
 
     try {
       tr.add_signer("inject_wif");
