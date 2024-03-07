@@ -2,7 +2,8 @@ import { TransactionBuilder } from 'bitsharesjs';
 import { Apis } from "bitsharesjs-ws";
 import prompts from 'prompts';
 
-import DeepLink from "../../src/lib/DeepLink.js";
+import DeepLink from '../../src/lib/DeepLink.js'
+
 import { testNodes } from "../../src/lib/queries.js";
 
 const onCancel = prompt => {
@@ -56,6 +57,21 @@ const onCancel = prompt => {
                     },
                 ]
               },
+              {
+                type: 'select',
+                name: 'wallet',
+                message: 'Which wallet do you want to use?',
+                choices: [
+                    {
+                        title: 'Beet',
+                        value: "beet"
+                    },
+                    {
+                        title: 'BeetEOS',
+                        value: "beeteos"
+                    },
+                ]
+              }
             ],
             { onCancel }
         );
@@ -194,9 +210,9 @@ const onCancel = prompt => {
       console.error(error);
       return reject(error);
     }
-  
+
     return resolve(
-      `${response.deeplinkType === true ? 'beet' : 'rawbeet'}://api?chain=${response.environment}&request=${encryptedPayload}`
+      `${!response.deeplinkType ? 'raw' : ''}${response.wallet}://api?chain=${response.environment}&request=${encryptedPayload}`
     );
   });
 }

@@ -4,12 +4,15 @@ let run = async function () {
     let injectionResult;
     try {
       injectionResult = await inject(
-      "InjectExample.016", // script name
-      "asset_fund_fee_pool", // operation name
+      "InjectExample.057", // script name
+      "ticket_create", // operation name
       {
-        from_account: "1.2.x",
-        asset_id: "1.2.x",
-        amount: 1,
+        account: "1.2.x",
+        target_type: 1,
+        amount: {
+          amount: 1,
+          asset_id: "1.3.x"
+        },
         extensions: []
       }
     );

@@ -36,15 +36,13 @@ let run = async function () {
     );
   } catch (error) {
     console.log(error)
-    return;
   }
 
-  if (injectionResult && injectionResult.includes('beet:')) {
+  if (injectionResult) {
       console.log("Successfully generated deeplink!");
       console.log(injectionResult)
   } else {
     console.log('Invalid injection result')
-    return;
   }
 
   process.exit(0);

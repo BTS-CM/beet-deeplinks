@@ -1,6 +1,6 @@
-import inject from './inject.js'
+import inject from "./inject.js";
 
-let run = async function () { 
+let run = async function () {
   let injectionResult;
   try {
     injectionResult = await inject(
@@ -21,48 +21,44 @@ let run = async function () {
             {
               base: {
                 amount: 1,
-                asset_id: "1.3.x"
+                asset_id: "1.3.x",
               },
               quote: {
                 amount: 1,
-                asset_id: "1.3.0"
-              }
-            }
+                asset_id: "1.3.0",
+              },
+            },
           ],
           [
             "1.3.1", // matching quote asset_id
             {
               base: {
                 amount: 1,
-                asset_id: "1.3.x"
+                asset_id: "1.3.x",
               },
               quote: {
                 amount: 1,
-                asset_id: "1.3.1"
-              }
-            }
-          ]
+                asset_id: "1.3.1",
+              },
+            },
+          ],
         ],
-        acceptable_borrowers: [{
-          "1.2.x": 1
-        }],
-        extensions: []
+        acceptable_borrowers: [["1.2.x", 1]],
+        extensions: [],
       }
     );
   } catch (error) {
-    console.log(error)
-    return;
+    console.log(error);
   }
 
-  if (injectionResult && injectionResult.includes('beet:')) {
-      console.log("Successfully generated deeplink!");
-      console.log(injectionResult)
+  if (injectionResult && injectionResult.includes("beet:")) {
+    console.log("Successfully generated deeplink!");
+    console.log(injectionResult);
   } else {
-    console.log('Invalid injection result')
-    return;
+    console.log("Invalid injection result");
   }
 
   process.exit(0);
-}
+};
 
 run();
